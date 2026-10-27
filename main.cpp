@@ -1,11 +1,15 @@
 
-#include "glfw3.h"
+#include <GLFW/glfw3.h>
 #include <iostream>
 
 using namespace std;
 
 int main()
 {
+#if defined(__linux__)
+  glfwInitHint(GLFW_WAYLAND_LIBDECOR, GLFW_WAYLAND_DISABLE_LIBDECOR);
+#endif
+
   if (glfwInit() == GLFW_FALSE) {
     cerr << "Failed to initialize GLFW\n";
     return 1;

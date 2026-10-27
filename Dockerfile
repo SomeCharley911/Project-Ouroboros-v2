@@ -10,6 +10,8 @@ RUN apt-get update && \
     build-essential \
     g++-15 \
     gcc-15 \
+    libglfw3-dev \
+    pkg-config \
     git \
     gdb \
     valgrind \

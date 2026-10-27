@@ -15,8 +15,8 @@ CXXFLAGS = -g -Wall -Wextra
 CXXFLAGS += -std=c++20 -fmodules-ts -pedantic -pedantic-errors
 CXXFLAGS += -Wfloat-equal -Wredundant-decls -Wshadow -Wconversion -Wuninitialized
 
-# list your .h files here
-HEADERS = glfw3.h
+GLFW_CFLAGS = $(shell pkg-config --cflags glfw3)
+GLFW_LIBS = $(shell pkg-config --libs glfw3)
 
 # list .cpp files here according to main program, tests, or both
 PROGRAM_FILES = main.cpp
@@ -27,12 +27,12 @@ SHARED_FILES =
 all: program.exe tests.exe
 
 .PHONY: program.exe # Always force rebuild of tests
-program.exe: $(SHARED_FILES) $(PROGRAM_FILES) $(HEADERS)
-	$(CXX) $(CXXFLAGS) $(SHARED_FILES) $(PROGRAM_FILES) -o $@
+program.exe: $(SHARED_FILES) $(PROGRAM_FILES)
+	$(CXX) $(CXXFLAGS) $(GLFW_CFLAGS) $(SHARED_FILES) $(PROGRAM_FILES) -o $@ $(GLFW_LIBS)
 
 .PHONY: tests.exe # Always force rebuild of tests
-tests.exe:  $(SHARED_FILES) $(TEST_FILES) $(HEADERS)
-	$(CXX) $(CXXFLAGS) $(SHARED_FILES) $(TEST_FILES) -o $@
+tests.exe:  $(SHARED_FILES) $(TEST_FILES)
+	$(CXX) $(CXXFLAGS) $(GLFW_CFLAGS) $(SHARED_FILES) $(TEST_FILES) -o $@ $(GLFW_LIBS)
 
 .PHONY: clean
 clean:
