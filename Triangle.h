@@ -2,6 +2,7 @@
 #define TRIANGLE_H
 
 #include <array>
+#include <cstddef>
 #include <vector>
 
 /**
@@ -55,7 +56,7 @@ public:
    *
    * @return Triangle* A pointer to the current triangle object
    */
-  Triangle* setVertex(size_t location, std::array<float, 2> vertex);
+  Triangle* setVertex(std::size_t location, std::array<float, 2> vertex);
 
   /**
    * @brief Set the Vertices of the triangle
@@ -67,10 +68,8 @@ public:
   Triangle* setVertices(std::array<std::array<float, 2>, 3> vertices);
 
 private:
-  std::array<std::array<float, 2>, 3> vertices = {
-      {-1, 0}, {0, 1}, {1, 0}}; /// Current vertices of the triangle
-  std::array<float, 3> color = {1.0f, 1.0f,
-                                1.0f}; /// current color of the triangle
+  std::array<std::array<float, 2>, 3> m_vertices = {{{-1, 0}, {0, 1}, {1, 0}}}; /// Current vertices of the triangle
+  std::array<float, 3> m_color = {1.0f, 1.0f, 1.0f}; /// current color of the triangle
 };
 
 #endif // TRIANGLE_H

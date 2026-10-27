@@ -12,3 +12,4 @@ SpaceBeforeInheritanceColon: false
 IndentGotoLabels: false
 KeepEmptyLinesAtTheStartOfBlocks: false
 SpaceAroundPointerQualifiers: Both
+ColumnLimit: 220 
