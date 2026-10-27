@@ -1,0 +1,5 @@
+*.exe
+*.zip
+*.o
+gcm.cache/
+*.dSYM/
