@@ -16,7 +16,7 @@ CXXFLAGS += -std=c++20 -fmodules-ts -pedantic -pedantic-errors
 CXXFLAGS += -Wfloat-equal -Wredundant-decls -Wshadow -Wconversion -Wuninitialized
 
 # list your .h files here
-HEADERS =
+HEADERS = glfw3.h
 
 # list .cpp files here according to main program, tests, or both
 PROGRAM_FILES = main.cpp
