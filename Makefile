@@ -1,12 +1,15 @@
 # force macs to use g++-15 to avoid clang mapped to g++
 ifeq ($(OS),Windows_NT)
 	CXX = g++
+	OPENGL_LIBS = -lopengl32
 else
 	OS_NAME := $(shell uname -s)
 	ifeq ($(OS_NAME),Darwin)
 		CXX = g++-15
+		OPENGL_LIBS = -framework OpenGL
 	else
 		CXX = g++
+		OPENGL_LIBS = -lGL
 	endif
 endif
 
@@ -28,11 +31,11 @@ all: program.exe tests.exe
 
 .PHONY: program.exe # Always force rebuild of tests
 program.exe: $(SHARED_FILES) $(PROGRAM_FILES)
-	$(CXX) $(CXXFLAGS) $(GLFW_CFLAGS) $(SHARED_FILES) $(PROGRAM_FILES) -o $@ $(GLFW_LIBS)
+	$(CXX) $(CXXFLAGS) $(GLFW_CFLAGS) $(SHARED_FILES) $(PROGRAM_FILES) -o $@ $(GLFW_LIBS) $(OPENGL_LIBS)
 
 .PHONY: tests.exe # Always force rebuild of tests
 tests.exe:  $(SHARED_FILES) $(TEST_FILES)
-	$(CXX) $(CXXFLAGS) $(GLFW_CFLAGS) $(SHARED_FILES) $(TEST_FILES) -o $@ $(GLFW_LIBS)
+	$(CXX) $(CXXFLAGS) $(GLFW_CFLAGS) $(SHARED_FILES) $(TEST_FILES) -o $@ $(GLFW_LIBS) $(OPENGL_LIBS)
 
 .PHONY: clean
 clean:
