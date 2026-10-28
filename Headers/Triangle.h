@@ -23,8 +23,7 @@ public:
    * @param array<std::array<float, 2>, 3> The vertices of the triangle
    * @param array<float, 3> The color to be used for the triangle
    */
-  Triangle(std::array<std::array<float, 2>, 3> vertices,
-           std::array<float, 3> color);
+  Triangle(std::array<std::array<float, 2>, 3> vertices, std::array<float, 3> color);
   /**
    * @brief Get the Current Color of the triangle
    *
@@ -69,7 +68,7 @@ public:
 
 private:
   std::array<std::array<float, 2>, 3> m_vertices = {{{-1, 0}, {0, 1}, {1, 0}}}; /// Current vertices of the triangle
-  std::array<float, 3> m_color = {1.0f, 1.0f, 1.0f}; /// current color of the triangle
+  std::array<float, 3> m_color = {1.0f, 1.0f, 1.0f};                            /// current color of the triangle
 };
 
 #endif // TRIANGLE_H
