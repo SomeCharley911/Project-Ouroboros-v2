@@ -24,7 +24,7 @@ GLFW_LIBS = $(shell pkg-config --libs glfw3)
 # list .cpp files here according to main program, tests, or both
 PROGRAM_FILES = main.cpp
 TEST_FILES = tests.cpp
-SHARED_FILES = Objects/Cube.cpp Objects/Point.cpp Objects/Triangle.cpp
+SHARED_FILES = Objects/Point.cpp Objects/Triangle.cpp Objects/Plate.cpp
 
 .PHONY: all
 all: program.exe tests.exe

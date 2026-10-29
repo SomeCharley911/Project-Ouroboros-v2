@@ -21,45 +21,53 @@ public:
   /**
    * @brief Construct a new triangle object with the provided position and color
    *
-   * @param array<Point, 3> The initial vertices of the triangle
-   * @param array<float, 3> The initial color of the triangle
+   * @param const array<Point, 3>& The initial vertices of the triangle
+   * @param const array<float, 3>& The initial color of the triangle
    */
-  Triangle(std::array<Point, 3> vertices, std::array<float, 3> color);
+  Triangle(const std::array<Point, 3>& vertices, const std::array<float, 3>& color);
   /**
    * @brief Get the Current Color of the triangle
    *
-   * @return array<float, 3> The current color of the triangle
+   * @return const array<float, 3>& The current color of the triangle
    */
-  std::array<float, 3> getColor() const;
+  const std::array<float, 3>& getColor() const;
 
   /**
    * @brief Get the Vertices of the triangle
    *
-   * @return array<Point, 3> The current position of the triangle
+   * @return const array<Point, 3>& The current position of the triangle
    */
-  std::array<Point, 3> getPosition() const;
+  const std::array<Point, 3>& getPosition() const;
+
+  /**
+   * @brief Get the unique identifier of the triangle
+   *
+   * @return long The unique identifier of the triangle
+   */
+  long getId() const;
 
   /**
    * @brief Set the Color of the triangle on screen
    *
-   * @param array<float, 3> The color to be used for the triangle
+   * @param const array<float, 3>& The color to be used for the triangle
    *
    * @return Triangle* A pointer to the current triangle object
    */
-  Triangle* setColor(std::array<float, 3> color);
+  Triangle* setColor(const std::array<float, 3>& color);
 
   /**
    * @brief Set the Position of the triangle
    *
-   * @param unsigned int The new position of the triangle
+   * @param const array<Point, 3>& The new position of the triangle
    *
    * @return Triangle* A pointer to the current triangle object
    */
-  Triangle* setPosition(std::array<Point, 3> position);
+  Triangle* setPosition(const std::array<Point, 3>& position);
 
 private:
   std::array<Point, 3> m_position;                   /// Current position of the triangle
   std::array<float, 3> m_color = {1.0f, 1.0f, 1.0f}; /// current color of the triangle
+  long m_id = reinterpret_cast<long>(this);          /// Unique identifier for the triangle
 };
 
 #endif // TRIANGLE_H

@@ -3,9 +3,10 @@
 #include <array>
 #include <cmath>
 #include <iostream>
+#include <utility>
 #include <vector>
 
-#include "Headers/Cube.h"
+#include "Headers/Plate.h"
 #include "Headers/Point.h"
 #include "Headers/Triangle.h"
 
@@ -19,8 +20,20 @@ constexpr float movement_speed = 3.0F;
 constexpr float rotation_speed = 1.5F;
 constexpr float max_pitch = 1.5F;
 constexpr float mouse_sensitivity = 0.0025F;
-constexpr int floor_half_extent = 20;
+constexpr int floor_half_extent = 200;
 constexpr float floor_elevation = -0.5F;
+constexpr int plate_side_length = 20;
+
+constexpr array<array<float, 3>, 8> plate_colors{{
+    {{0.82F, 0.30F, 0.22F}},
+    {{0.20F, 0.57F, 0.78F}},
+    {{0.88F, 0.69F, 0.20F}},
+    {{0.39F, 0.68F, 0.27F}},
+    {{0.68F, 0.35F, 0.75F}},
+    {{0.18F, 0.68F, 0.57F}},
+    {{0.91F, 0.45F, 0.24F}},
+    {{0.34F, 0.46F, 0.82F}},
+}};
 
 struct Camera {
   array<float, 3> position{0.0F, 0.0F, 0.0F};
@@ -173,90 +186,116 @@ array<float, 3> toCameraSpace(const array<float, 3>& point, const Camera& camera
   };
 }
 
-void drawCube(const Cube& cube, float aspect_ratio, const Camera& camera)
+vector<Triangle> makeCube(const array<float, 3>& center, const array<float, 3>& color)
 {
-  const auto position = cube.getPosition();
-  const auto color = cube.getColor();
-  array<array<float, 3>, cube_offsets.size()> camera_vertices{};
-  array<array<float, 3>, cube_offsets.size()> screen_vertices{};
-  array<bool, cube_offsets.size()> visible{};
-
+  array<Point, cube_offsets.size()> vertices{};
   for (size_t i = 0; i < cube_offsets.size(); ++i) {
-    const array<float, 3> world_vertex{
-        static_cast<float>(position[0]) + cube_offsets[i][0],
-        static_cast<float>(position[1]) + cube_offsets[i][1],
-        static_cast<float>(position[2]) + cube_offsets[i][2],
-    };
-    camera_vertices[i] = toCameraSpace(world_vertex, camera);
-    visible[i] = projectPoint(camera_vertices[i], aspect_ratio, screen_vertices[i]);
+    vertices[i] = Point({
+        center[0] + cube_offsets[i][0],
+        center[1] + cube_offsets[i][1],
+        center[2] + cube_offsets[i][2],
+    });
   }
 
-  glColor3f(color[0], color[1], color[2]);
-  glBegin(GL_TRIANGLES);
+  vector<Triangle> triangles;
+  triangles.reserve(cube_triangles.size());
   for (const auto& triangle : cube_triangles) {
-    if (!visible[triangle[0]] || !visible[triangle[1]] || !visible[triangle[2]]) {
-      continue;
-    }
-    for (const size_t vertex : triangle) {
-      glVertex3f(screen_vertices[vertex][0], screen_vertices[vertex][1], screen_vertices[vertex][2]);
-    }
+    triangles.emplace_back(
+        array<Point, 3>{vertices[triangle[0]], vertices[triangle[1]], vertices[triangle[2]]},
+        color);
   }
-  glEnd();
+  return triangles;
 }
 
-vector<Triangle> makeFloor()
+vector<Plate> makePlates()
 {
-  vector<Triangle> floor;
-  floor.reserve(static_cast<size_t>(floor_half_extent * floor_half_extent * 8));
+  constexpr int plates_per_side = (floor_half_extent * 2) / plate_side_length;
+  vector<Plate> plates;
+  plates.reserve(static_cast<size_t>(plates_per_side * plates_per_side));
 
-  for (int x = -floor_half_extent; x < floor_half_extent; ++x) {
-    for (int z = -floor_half_extent; z < floor_half_extent; ++z) {
-      const float left = static_cast<float>(x);
-      const float right = static_cast<float>(x + 1);
-      const float near_edge = static_cast<float>(z);
-      const float far_edge = static_cast<float>(z + 1);
-      const Point near_left({left, floor_elevation, near_edge});
-      const Point near_right({right, floor_elevation, near_edge});
-      const Point far_left({left, floor_elevation, far_edge});
-      const Point far_right({right, floor_elevation, far_edge});
-      const array<float, 3> color = (x + z) % 2 == 0 ? array<float, 3>{0.24F, 0.27F, 0.30F} : array<float, 3>{0.30F, 0.33F, 0.36F};
+  for (int plate_x = 0; plate_x < plates_per_side; ++plate_x) {
+    for (int plate_z = 0; plate_z < plates_per_side; ++plate_z) {
+      vector<Triangle> composition;
+      composition.reserve(static_cast<size_t>(plate_side_length * plate_side_length * 2));
+      const size_t color_index = static_cast<size_t>((plate_x * 3 + plate_z * 5) % static_cast<int>(plate_colors.size()));
+      const auto color = plate_colors[color_index];
+      const int start_x = -floor_half_extent + plate_x * plate_side_length;
+      const int start_z = -floor_half_extent + plate_z * plate_side_length;
 
-      floor.emplace_back(array<Point, 3>{near_left, near_right, far_right}, color);
-      floor.emplace_back(array<Point, 3>{near_left, far_right, far_left}, color);
+      for (int x = start_x; x < start_x + plate_side_length; ++x) {
+        for (int z = start_z; z < start_z + plate_side_length; ++z) {
+          const float left = static_cast<float>(x);
+          const float right = static_cast<float>(x + 1);
+          const float near_edge = static_cast<float>(z);
+          const float far_edge = static_cast<float>(z + 1);
+          const Point near_left({left, floor_elevation, near_edge});
+          const Point near_right({right, floor_elevation, near_edge});
+          const Point far_left({left, floor_elevation, far_edge});
+          const Point far_right({right, floor_elevation, far_edge});
+
+          composition.emplace_back(array<Point, 3>{near_left, near_right, far_right}, color);
+          composition.emplace_back(array<Point, 3>{near_left, far_right, far_left}, color);
+        }
+      }
+
+      plates.emplace_back(std::move(composition));
     }
   }
 
-  return floor;
+  return plates;
 }
 
-void drawFloor(const vector<Triangle>& floor, float aspect_ratio, const Camera& camera)
+void drawTriangle(const Triangle& triangle, float aspect_ratio, const Camera& camera)
+{
+  const auto vertices = triangle.getPosition();
+  array<array<float, 3>, 3> screen_vertices{};
+  bool visible = true;
+
+  for (size_t i = 0; i < vertices.size(); ++i) {
+    const auto position = vertices[i].getPosition();
+    const auto camera_position = toCameraSpace(position, camera);
+    if (!projectPoint(camera_position, aspect_ratio, screen_vertices[i])) {
+      visible = false;
+      break;
+    }
+  }
+
+  if (!visible) {
+    return;
+  }
+
+  const auto color = triangle.getColor();
+  glColor3f(color[0], color[1], color[2]);
+  for (const auto& vertex : screen_vertices) {
+    glVertex3f(vertex[0], vertex[1], vertex[2]);
+  }
+}
+
+void drawTriangles(const vector<Triangle>& triangles, float aspect_ratio, const Camera& camera)
 {
   glBegin(GL_TRIANGLES);
-  for (const Triangle& triangle : floor) {
-    const auto vertices = triangle.getPosition();
-    array<array<float, 3>, 3> screen_vertices{};
-    bool visible = true;
+  for (const Triangle& triangle : triangles) {
+    drawTriangle(triangle, aspect_ratio, camera);
+  }
+  glEnd();
+}
 
-    for (size_t i = 0; i < vertices.size(); ++i) {
-      const auto position = vertices[i].getPosition();
-      const auto camera_position = toCameraSpace(position, camera);
-      if (!projectPoint(camera_position, aspect_ratio, screen_vertices[i])) {
-        visible = false;
-        break;
-      }
-    }
-
-    if (!visible) {
-      continue;
-    }
-
-    const auto color = triangle.getColor();
-    glColor3f(color[0], color[1], color[2]);
-    for (const auto& vertex : screen_vertices) {
-      glVertex3f(vertex[0], vertex[1], vertex[2]);
+void drawPlates(const vector<Plate>& plates, float aspect_ratio, const Camera& camera)
+{
+  glBegin(GL_TRIANGLES);
+  for (const Plate& plate : plates) {
+    for (const Triangle& triangle : plate.getComposition()) {
+      drawTriangle(triangle, aspect_ratio, camera);
     }
   }
   glEnd();
+}
+
+void drawTriangleMeshes(const vector<vector<Triangle>>& meshes, float aspect_ratio, const Camera& camera)
+{
+  for (const vector<Triangle>& mesh : meshes) {
+    drawTriangles(mesh, aspect_ratio, camera);
+  }
 }
 } // namespace
 
@@ -266,12 +305,12 @@ int main()
   glfwInitHint(GLFW_WAYLAND_LIBDECOR, GLFW_WAYLAND_DISABLE_LIBDECOR);
 #endif
 
-  const array<Cube, 3> cubes{
-      Cube({0, 0, 4}, {1.0F, 0.2F, 0.2F}),
-      Cube({1, 0, 6}, {0.2F, 0.8F, 0.3F}),
-      Cube({0, 1, 7}, {0.2F, 0.4F, 1.0F}),
+  const vector<vector<Triangle>> cubes{
+      makeCube({0.0F, 0.0F, 4.0F}, {1.0F, 0.2F, 0.2F}),
+      makeCube({1.0F, 0.0F, 6.0F}, {0.2F, 0.8F, 0.3F}),
+      makeCube({0.0F, 1.0F, 7.0F}, {0.2F, 0.4F, 1.0F}),
   };
-  const vector<Triangle> floor = makeFloor();
+  const vector<Plate> plates = makePlates();
 
   if (glfwInit() == GLFW_FALSE) {
     cerr << "Failed to initialize GLFW\n";
@@ -320,10 +359,8 @@ int main()
 
     if (framebuffer_width > 0 && framebuffer_height > 0) {
       const float aspect_ratio = static_cast<float>(framebuffer_width) / static_cast<float>(framebuffer_height);
-      drawFloor(floor, aspect_ratio, camera);
-      for (const Cube& cube : cubes) {
-        drawCube(cube, aspect_ratio, camera);
-      }
+      drawPlates(plates, aspect_ratio, camera);
+      drawTriangleMeshes(cubes, aspect_ratio, camera);
     }
 
     glfwSwapBuffers(window);

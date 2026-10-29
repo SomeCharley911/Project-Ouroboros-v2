@@ -6,7 +6,7 @@
 #include <vector>
 
 /**
- * @brief A simple vector point for displaying to the screen using OpenGL.
+ * @brief A simple vector point
  *
  */
 class Point {
@@ -22,26 +22,26 @@ public:
    *
    * @param array<float, 3> The initial position of the point
    */
-  Point(std::array<float, 3> position);
+  Point(const std::array<float, 3>& position);
 
   /**
    * @brief Get the Position of the point
    *
-   * @return array<float, 3> The current position of the point
+   * @return const array<float, 3>& The current position of the point
    */
-  std::array<float, 3> getPosition() const;
+  const std::array<float, 3>& getPosition() const;
 
   /**
    * @brief Set the Position of the point
    *
-   * @param array<float, 3> The new position of the point
+   * @param const array<float, 3>& The new position of the point
    *
    * @return Point* A pointer to the current point object
    */
-  Point* setPosition(std::array<float, 3> position);
+  Point* setPosition(const std::array<float, 3>& position);
 
 private:
-  std::array<float, 3> m_position; /// Current position of the point
+  std::array<float, 3> m_position{0.0F, 0.0F, 0.0F}; /// Current position of the point
 };
 
 #endif // POINT_H
