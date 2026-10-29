@@ -1,41 +1,30 @@
-#include "../Triangle.h"
-
-#include <utility>
-
-using namespace std;
+#include "../Headers/Triangle.h"
 
 Triangle::Triangle() = default;
 
-Triangle::Triangle(array<array<float, 2>, 3> vertices, array<float, 3> color)
+Triangle::Triangle(std::array<Point, 3> vertices, std::array<float, 3> color)
+    : m_position(vertices), m_color(color)
 {
-  m_vertices = move(vertices);
-  m_color = move(color);
 }
 
-array<float, 3> Triangle::getColor() const
+std::array<float, 3> Triangle::getColor() const
 {
   return m_color;
 }
 
-array<array<float, 2>, 3> Triangle::getVertices() const
+std::array<Point, 3> Triangle::getPosition() const
 {
-  return m_vertices;
+  return m_position;
 }
 
-Triangle* Triangle::setColor(array<float, 3> color)
+Triangle* Triangle::setColor(std::array<float, 3> color)
 {
   m_color = color;
   return this;
 }
 
-Triangle* Triangle::setVertex(size_t location, array<float, 2> vertex)
+Triangle* Triangle::setPosition(std::array<Point, 3> position)
 {
-  m_vertices.at(location) = vertex;
-  return this;
-}
-
-Triangle* Triangle::setVertices(array<array<float, 2>, 3> new_vertices)
-{
-  m_vertices = new_vertices;
+  m_position = position;
   return this;
 }
