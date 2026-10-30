@@ -24,7 +24,7 @@ public:
    * @param const array<Point, 3>& The initial vertices of the triangle
    * @param const array<float, 3>& The initial color of the triangle
    */
-  Triangle(const std::array<Point, 3>& vertices, const std::array<float, 3>& color);
+  Triangle(const std::array<Point*, 3>& vertices, const std::array<float, 3>& color);
   /**
    * @brief Get the Current Color of the triangle
    *
@@ -37,7 +37,7 @@ public:
    *
    * @return const array<Point, 3>& The current position of the triangle
    */
-  const std::array<Point, 3>& getPosition() const;
+  const std::array<Point*, 3>& getPosition() const;
 
   /**
    * @brief Get the unique identifier of the triangle
@@ -62,10 +62,10 @@ public:
    *
    * @return Triangle* A pointer to the current triangle object
    */
-  Triangle* setPosition(const std::array<Point, 3>& position);
+  Triangle* setPosition(const std::array<Point*, 3>& position);
 
 private:
-  std::array<Point, 3> m_position;                   /// Current position of the triangle
+  std::array<Point*, 3> m_position;                  /// Current position of the triangle
   std::array<float, 3> m_color = {1.0f, 1.0f, 1.0f}; /// current color of the triangle
   long m_id = reinterpret_cast<long>(this);          /// Unique identifier for the triangle
 };

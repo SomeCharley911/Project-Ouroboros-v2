@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <deque>
 #include <iostream>
 #include <utility>
 #include <vector>
@@ -186,28 +187,29 @@ array<float, 3> toCameraSpace(const array<float, 3>& point, const Camera& camera
   };
 }
 
-vector<Triangle> makeCube(const array<float, 3>& center, const array<float, 3>& color)
+vector<Triangle> makeCube(const array<float, 3>& center, const array<float, 3>& color, deque<Point>& point_storage)
 {
-  array<Point, cube_offsets.size()> vertices{};
+  array<Point*, cube_offsets.size()> vertices{};
   for (size_t i = 0; i < cube_offsets.size(); ++i) {
-    vertices[i] = Point({
+    point_storage.emplace_back(array<float, 3>{
         center[0] + cube_offsets[i][0],
         center[1] + cube_offsets[i][1],
         center[2] + cube_offsets[i][2],
     });
+    vertices[i] = &point_storage.back();
   }
 
   vector<Triangle> triangles;
   triangles.reserve(cube_triangles.size());
   for (const auto& triangle : cube_triangles) {
     triangles.emplace_back(
-        array<Point, 3>{vertices[triangle[0]], vertices[triangle[1]], vertices[triangle[2]]},
+        array<Point*, 3>{vertices[triangle[0]], vertices[triangle[1]], vertices[triangle[2]]},
         color);
   }
   return triangles;
 }
 
-vector<Plate> makePlates()
+vector<Plate> makePlates(deque<Point>& point_storage)
 {
   constexpr int plates_per_side = (floor_half_extent * 2) / plate_side_length;
   vector<Plate> plates;
@@ -228,13 +230,17 @@ vector<Plate> makePlates()
           const float right = static_cast<float>(x + 1);
           const float near_edge = static_cast<float>(z);
           const float far_edge = static_cast<float>(z + 1);
-          const Point near_left({left, floor_elevation, near_edge});
-          const Point near_right({right, floor_elevation, near_edge});
-          const Point far_left({left, floor_elevation, far_edge});
-          const Point far_right({right, floor_elevation, far_edge});
+          point_storage.emplace_back(array<float, 3>{left, floor_elevation, near_edge});
+          Point* near_left = &point_storage.back();
+          point_storage.emplace_back(array<float, 3>{right, floor_elevation, near_edge});
+          Point* near_right = &point_storage.back();
+          point_storage.emplace_back(array<float, 3>{left, floor_elevation, far_edge});
+          Point* far_left = &point_storage.back();
+          point_storage.emplace_back(array<float, 3>{right, floor_elevation, far_edge});
+          Point* far_right = &point_storage.back();
 
-          composition.emplace_back(array<Point, 3>{near_left, near_right, far_right}, color);
-          composition.emplace_back(array<Point, 3>{near_left, far_right, far_left}, color);
+          composition.emplace_back(array<Point*, 3>{near_left, near_right, far_right}, color);
+          composition.emplace_back(array<Point*, 3>{near_left, far_right, far_left}, color);
         }
       }
 
@@ -252,7 +258,7 @@ void drawTriangle(const Triangle& triangle, float aspect_ratio, const Camera& ca
   bool visible = true;
 
   for (size_t i = 0; i < vertices.size(); ++i) {
-    const auto position = vertices[i].getPosition();
+    const auto position = vertices[i]->getPosition();
     const auto camera_position = toCameraSpace(position, camera);
     if (!projectPoint(camera_position, aspect_ratio, screen_vertices[i])) {
       visible = false;
@@ -305,12 +311,13 @@ int main()
   glfwInitHint(GLFW_WAYLAND_LIBDECOR, GLFW_WAYLAND_DISABLE_LIBDECOR);
 #endif
 
+  deque<Point> point_storage;
   const vector<vector<Triangle>> cubes{
-      makeCube({0.0F, 0.0F, 4.0F}, {1.0F, 0.2F, 0.2F}),
-      makeCube({1.0F, 0.0F, 6.0F}, {0.2F, 0.8F, 0.3F}),
-      makeCube({0.0F, 1.0F, 7.0F}, {0.2F, 0.4F, 1.0F}),
+      makeCube({0.0F, 0.0F, 4.0F}, {1.0F, 0.2F, 0.2F}, point_storage),
+      makeCube({1.0F, 0.0F, 6.0F}, {0.2F, 0.8F, 0.3F}, point_storage),
+      makeCube({0.0F, 1.0F, 7.0F}, {0.2F, 0.4F, 1.0F}, point_storage),
   };
-  const vector<Plate> plates = makePlates();
+  const vector<Plate> plates = makePlates(point_storage);
 
   if (glfwInit() == GLFW_FALSE) {
     cerr << "Failed to initialize GLFW\n";

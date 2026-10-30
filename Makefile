@@ -21,22 +21,21 @@ CXXFLAGS += -Wfloat-equal -Wredundant-decls -Wshadow -Wconversion -Wuninitialize
 GLFW_CFLAGS = $(shell pkg-config --cflags glfw3)
 GLFW_LIBS = $(shell pkg-config --libs glfw3)
 
+# list .h files here
+HEADERS = Headers/Plate.h Headers/Triangle.h Headers/Point.h
+
+
 # list .cpp files here according to main program, tests, or both
 PROGRAM_FILES = main.cpp
-TEST_FILES = tests.cpp
 SHARED_FILES = Objects/Point.cpp Objects/Triangle.cpp Objects/Plate.cpp
 
 .PHONY: all
-all: program.exe tests.exe
+all: program.exe
 
 .PHONY: program.exe # Always force rebuild of tests
 program.exe: $(SHARED_FILES) $(PROGRAM_FILES)
 	$(CXX) $(CXXFLAGS) $(GLFW_CFLAGS) $(SHARED_FILES) $(PROGRAM_FILES) -o $@ $(GLFW_LIBS) $(OPENGL_LIBS)
 
-.PHONY: tests.exe # Always force rebuild of tests
-tests.exe:  $(SHARED_FILES) $(TEST_FILES)
-	$(CXX) $(CXXFLAGS) $(GLFW_CFLAGS) $(SHARED_FILES) $(TEST_FILES) -o $@ $(GLFW_LIBS) $(OPENGL_LIBS)
-
 .PHONY: clean
 clean:
-	rm -f program.exe tests.exe
+	rm -f program.exe
