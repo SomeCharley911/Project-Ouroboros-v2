@@ -3,7 +3,7 @@
 
 #include "Triangle.h"
 #include <cstddef>
-#include <vector>
+#include <set>
 
 /**
  * @brief A simple tectonic plate for world generation
@@ -22,7 +22,7 @@ public:
    *
    * @param vector<Triangle> The initial composition of the plate
    */
-  Plate(std::vector<Triangle> composition);
+  Plate(std::set<Triangle> composition);
   /**
    * @brief Get the Vertices of the plate
    *
