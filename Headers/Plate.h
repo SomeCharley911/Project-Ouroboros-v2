@@ -28,7 +28,7 @@ public:
    *
    * @return vector<Triangle> The current composition of the plate
    */
-  const std::vector<Triangle>& getComposition() const;
+  const std::set<Triangle>& getComposition() const;
 
   /**
    * @brief Set the Composition of the plate
@@ -37,7 +37,7 @@ public:
    *
    * @return Plate* A pointer to the current plate object
    */
-  Plate* setComposition(std::vector<Triangle> composition);
+  Plate* setComposition(std::set<Triangle> composition);
 
   /**
    * @brief Add a single triangle to the plate's composition
