@@ -15,6 +15,7 @@
 using namespace std;
 
 namespace {
+// Projection range and camera controls, expressed in world units and radians.
 constexpr float near_plane = 0.1F;
 constexpr float far_plane = 100.0F;
 constexpr float focal_length = 1.7320508F;
@@ -26,6 +27,7 @@ constexpr int floor_half_extent = 200;
 constexpr float floor_elevation = -0.5F;
 constexpr int plate_side_length = 20;
 
+// Colors cycle across the generated plates to make their boundaries visible.
 constexpr array<array<float, 3>, 8> plate_colors{{
     {{0.82F, 0.30F, 0.22F}},
     {{0.20F, 0.57F, 0.78F}},
@@ -37,12 +39,14 @@ constexpr array<array<float, 3>, 8> plate_colors{{
     {{0.34F, 0.46F, 0.82F}},
 }};
 
+// Camera position is in world coordinates; yaw and pitch describe its orientation.
 struct Camera {
   array<float, 3> position{0.0F, 0.0F, 0.0F};
   float yaw = 0.0F;
   float pitch = 0.0F;
 };
 
+// GLFW callback state keeps mouse history alongside the camera it controls.
 struct MouseLookState {
   Camera* camera;
   bool captured = true;
@@ -70,10 +74,12 @@ void updateMouseLook(GLFWwindow* window, double x_position, double y_position)
   state->last_x = x_position;
   state->last_y = y_position;
 
+  // Convert cursor movement into view rotation and limit looking straight up or down.
   state->camera->yaw += static_cast<float>(x_offset) * mouse_sensitivity;
   state->camera->pitch = clamp(state->camera->pitch + static_cast<float>(y_offset) * mouse_sensitivity, -max_pitch, max_pitch);
 }
 
+// Unit-cube corner offsets and the corner indices that form its twelve triangles.
 constexpr array<array<float, 3>, 8> cube_offsets{{
     {{-0.5F, -0.5F, -0.5F}},
     {{0.5F, -0.5F, -0.5F}},
@@ -107,6 +113,7 @@ bool projectPoint(const array<float, 3>& point, float aspect_ratio, array<float,
     return false;
   }
 
+  // Perspective projection maps camera-space coordinates into normalized device space.
   projected = {
       point[0] * focal_length / (depth * aspect_ratio),
       point[1] * focal_length / depth,
@@ -119,6 +126,7 @@ void updateCamera(GLFWwindow* window, Camera& camera, float delta_time)
 {
   const auto pressed = [window](int key) { return glfwGetKey(window, key) == GLFW_PRESS; };
 
+  // Arrow keys turn the camera independently of its movement.
   const float turn = rotation_speed * delta_time;
   if (pressed(GLFW_KEY_LEFT)) {
     camera.yaw -= turn;
@@ -155,6 +163,7 @@ void updateCamera(GLFWwindow* window, Camera& camera, float delta_time)
     vertical -= 1.0F;
   }
 
+  // Normalize horizontal input so moving diagonally is not faster than moving straight.
   const float horizontal_length = sqrt(forward * forward + strafe * strafe);
   if (horizontal_length > 0.0F) {
     forward /= horizontal_length;
@@ -164,6 +173,7 @@ void updateCamera(GLFWwindow* window, Camera& camera, float delta_time)
   const float yaw_cos = cos(camera.yaw);
   const float yaw_sin = sin(camera.yaw);
   const float distance = movement_speed * delta_time;
+  // Rotate forward/strafe input by yaw, then apply vertical movement directly.
   camera.position[0] += (yaw_sin * forward + yaw_cos * strafe) * distance;
   camera.position[1] += vertical * distance;
   camera.position[2] += (yaw_cos * forward - yaw_sin * strafe) * distance;
@@ -171,6 +181,7 @@ void updateCamera(GLFWwindow* window, Camera& camera, float delta_time)
 
 array<float, 3> toCameraSpace(const array<float, 3>& point, const Camera& camera)
 {
+  // Translate the world point relative to the camera before rotating into its view axes.
   const float relative_x = point[0] - camera.position[0];
   const float relative_y = point[1] - camera.position[1];
   const float relative_z = point[2] - camera.position[2];
@@ -181,6 +192,7 @@ array<float, 3> toCameraSpace(const array<float, 3>& point, const Camera& camera
   const float yaw_x = yaw_cos * relative_x - yaw_sin * relative_z;
   const float yaw_z = yaw_sin * relative_x + yaw_cos * relative_z;
 
+  // Apply pitch after yaw and return coordinates where positive Z is in front of the camera.
   return {
       yaw_x,
       pitch_cos * relative_y - pitch_sin * yaw_z,
@@ -191,6 +203,7 @@ array<float, 3> toCameraSpace(const array<float, 3>& point, const Camera& camera
 vector<Triangle> makeCube(const array<float, 3>& center, const array<float, 3>& color, deque<Point>& point_storage)
 {
   array<Point*, cube_offsets.size()> vertices{};
+  // Keep vertices in stable storage because triangles refer to them by pointer.
   for (size_t i = 0; i < cube_offsets.size(); ++i) {
     point_storage.emplace_back(array<float, 3>{
         center[0] + cube_offsets[i][0],
@@ -202,6 +215,7 @@ vector<Triangle> makeCube(const array<float, 3>& center, const array<float, 3>& 
 
   vector<Triangle> triangles;
   triangles.reserve(cube_triangles.size());
+  // Resolve each triangle's corner indices into pointers to the stored vertices.
   for (const auto& triangle : cube_triangles) {
     triangles.emplace_back(
         array<Point*, 3>{vertices[triangle[0]], vertices[triangle[1]], vertices[triangle[2]]},
@@ -212,6 +226,7 @@ vector<Triangle> makeCube(const array<float, 3>& center, const array<float, 3>& 
 
 vector<Plate> makePlates(deque<Point>& point_storage)
 {
+  // Tile the square world area with equal-sized plates.
   constexpr int plates_per_side = (floor_half_extent * 2) / plate_side_length;
   vector<Plate> plates;
   plates.reserve(static_cast<size_t>(plates_per_side * plates_per_side));
@@ -219,17 +234,20 @@ vector<Plate> makePlates(deque<Point>& point_storage)
   for (int plate_x = 0; plate_x < plates_per_side; ++plate_x) {
     for (int plate_z = 0; plate_z < plates_per_side; ++plate_z) {
       set<Triangle> composition;
+      // Use a repeatable color pattern based on the plate's grid coordinates.
       const size_t color_index = static_cast<size_t>((plate_x * 3 + plate_z * 5) % static_cast<int>(plate_colors.size()));
       const auto color = plate_colors[color_index];
       const int start_x = -floor_half_extent + plate_x * plate_side_length;
       const int start_z = -floor_half_extent + plate_z * plate_side_length;
 
+      // Each grid cell is a quad split into two triangles.
       for (int x = start_x; x < start_x + plate_side_length; ++x) {
         for (int z = start_z; z < start_z + plate_side_length; ++z) {
           const float left = static_cast<float>(x);
           const float right = static_cast<float>(x + 1);
           const float near_edge = static_cast<float>(z);
           const float far_edge = static_cast<float>(z + 1);
+          // Store each quad corner separately; deque keeps the triangle pointers stable.
           point_storage.emplace_back(array<float, 3>{left, floor_elevation, near_edge});
           Point* near_left = &point_storage.back();
           point_storage.emplace_back(array<float, 3>{right, floor_elevation, near_edge});
@@ -257,6 +275,7 @@ void drawTriangle(const Triangle& triangle, float aspect_ratio, const Camera& ca
   array<array<float, 3>, 3> screen_vertices{};
   bool visible = true;
 
+  // Transform and project every vertex; skip the triangle if any vertex is behind the near plane.
   for (size_t i = 0; i < vertices.size(); ++i) {
     const auto position = vertices[i]->getPosition();
     const auto camera_position = toCameraSpace(position, camera);
@@ -272,6 +291,7 @@ void drawTriangle(const Triangle& triangle, float aspect_ratio, const Camera& ca
 
   const auto color = triangle.getColor();
   glColor3f(color[0], color[1], color[2]);
+  // OpenGL is in triangle mode, so submit the projected vertices in order.
   for (const auto& vertex : screen_vertices) {
     glVertex3f(vertex[0], vertex[1], vertex[2]);
   }
@@ -279,6 +299,7 @@ void drawTriangle(const Triangle& triangle, float aspect_ratio, const Camera& ca
 
 void drawTriangles(const vector<Triangle>& triangles, float aspect_ratio, const Camera& camera)
 {
+  // Submit a vector mesh as one batch of immediate-mode triangles.
   glBegin(GL_TRIANGLES);
   for (const Triangle& triangle : triangles) {
     drawTriangle(triangle, aspect_ratio, camera);
@@ -288,6 +309,7 @@ void drawTriangles(const vector<Triangle>& triangles, float aspect_ratio, const 
 
 void drawPlates(const vector<Plate>& plates, float aspect_ratio, const Camera& camera)
 {
+  // Plate compositions are sets, so traverse each plate's stored triangles directly.
   glBegin(GL_TRIANGLES);
   for (const Plate& plate : plates) {
     for (const Triangle& triangle : plate.getComposition()) {
@@ -299,6 +321,7 @@ void drawPlates(const vector<Plate>& plates, float aspect_ratio, const Camera& c
 
 void drawTriangleMeshes(const vector<vector<Triangle>>& meshes, float aspect_ratio, const Camera& camera)
 {
+  // Draw each independent mesh using the common triangle rendering path.
   for (const vector<Triangle>& mesh : meshes) {
     drawTriangles(mesh, aspect_ratio, camera);
   }
@@ -308,9 +331,11 @@ void drawTriangleMeshes(const vector<vector<Triangle>>& meshes, float aspect_rat
 int main()
 {
 #if defined(__linux__)
+  // Avoid the optional Wayland client-side decorations dependency where available.
   glfwInitHint(GLFW_WAYLAND_LIBDECOR, GLFW_WAYLAND_DISABLE_LIBDECOR);
 #endif
 
+  // Generate geometry before rendering; triangles retain pointers into point_storage.
   deque<Point> point_storage;
   const vector<vector<Triangle>> cubes{
       makeCube({0.0F, 0.0F, 4.0F}, {1.0F, 0.2F, 0.2F}, point_storage),
@@ -319,6 +344,7 @@ int main()
   };
   const vector<Plate> plates = makePlates(point_storage);
 
+  // Initialize GLFW and create the window/context used by OpenGL.
   if (glfwInit() == GLFW_FALSE) {
     cerr << "Failed to initialize GLFW\n";
     return 1;
@@ -336,6 +362,7 @@ int main()
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LESS);
 
+  // Start above the ground, facing along the positive Z direction.
   Camera camera{{0.0F, 1.5F, 0.0F}};
   MouseLookState mouse_look{&camera};
   glfwSetWindowUserPointer(window, &mouse_look);
@@ -344,6 +371,7 @@ int main()
 
   double previous_frame_time = glfwGetTime();
   while (!glfwWindowShouldClose(window)) {
+    // Escape releases the captured cursor so the user can interact with the window.
     if (mouse_look.captured && glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
       mouse_look.captured = false;
       glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
@@ -354,6 +382,7 @@ int main()
     previous_frame_time = current_frame_time;
     updateCamera(window, camera, delta_time);
 
+    // Use framebuffer dimensions (which may differ from window dimensions on HiDPI displays).
     int framebuffer_width = 0;
     int framebuffer_height = 0;
     glfwGetFramebufferSize(window, &framebuffer_width, &framebuffer_height);
@@ -364,6 +393,7 @@ int main()
     glClearColor(0.08F, 0.08F, 0.1F, 1.0F);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    // Skip projection and drawing while the framebuffer has no drawable area.
     if (framebuffer_width > 0 && framebuffer_height > 0) {
       const float aspect_ratio = static_cast<float>(framebuffer_width) / static_cast<float>(framebuffer_height);
       drawPlates(plates, aspect_ratio, camera);
@@ -372,6 +402,7 @@ int main()
 
     glfwSwapBuffers(window);
 
+    // Process input and window events after presenting the rendered frame.
     glfwPollEvents();
   }
 
