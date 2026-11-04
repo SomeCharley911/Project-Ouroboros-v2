@@ -36,3 +36,8 @@ long Triangle::getId() const
 {
   return m_id;
 }
+
+bool Triangle::operator>(const Triangle& other) const
+{
+  return m_id > other.m_id;
+}
