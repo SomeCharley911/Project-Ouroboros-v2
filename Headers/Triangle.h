@@ -67,7 +67,7 @@ public:
   /**
    * @brief Compares the id's of triangles (result isn't helpful but it allows the triangle to be put in sets)
    *
-   * @param other
+   * @param other The other triangle to compare to
    * @return true
    * @return false
    */
