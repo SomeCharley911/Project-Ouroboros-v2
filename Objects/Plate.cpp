@@ -1,12 +1,14 @@
 #include "../Headers/Plate.h"
 
+#include <utility>
+
 using namespace std;
 
 Plate::Plate() = default;
 
 Plate::Plate(set<Triangle> composition)
+    : m_composition(move(composition))
 {
-  m_composition = composition;
 }
 
 const set<Triangle>& Plate::getComposition() const
@@ -16,13 +18,13 @@ const set<Triangle>& Plate::getComposition() const
 
 Plate* Plate::setComposition(set<Triangle> composition)
 {
-  m_composition = composition;
+  m_composition = move(composition);
   return this;
 }
 
 Plate* Plate::addTriangle(Triangle triangle)
 {
-  m_composition.insert(triangle);
+  m_composition.insert(move(triangle));
   return this;
 }
 

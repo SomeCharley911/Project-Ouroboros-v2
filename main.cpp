@@ -4,6 +4,7 @@
 #include <cmath>
 #include <deque>
 #include <iostream>
+#include <set>
 #include <utility>
 #include <vector>
 
@@ -217,8 +218,7 @@ vector<Plate> makePlates(deque<Point>& point_storage)
 
   for (int plate_x = 0; plate_x < plates_per_side; ++plate_x) {
     for (int plate_z = 0; plate_z < plates_per_side; ++plate_z) {
-      vector<Triangle> composition;
-      composition.reserve(static_cast<size_t>(plate_side_length * plate_side_length * 2));
+      set<Triangle> composition;
       const size_t color_index = static_cast<size_t>((plate_x * 3 + plate_z * 5) % static_cast<int>(plate_colors.size()));
       const auto color = plate_colors[color_index];
       const int start_x = -floor_half_extent + plate_x * plate_side_length;
@@ -239,8 +239,8 @@ vector<Plate> makePlates(deque<Point>& point_storage)
           point_storage.emplace_back(array<float, 3>{right, floor_elevation, far_edge});
           Point* far_right = &point_storage.back();
 
-          composition.emplace_back(array<Point*, 3>{near_left, near_right, far_right}, color);
-          composition.emplace_back(array<Point*, 3>{near_left, far_right, far_left}, color);
+          composition.emplace(array<Point*, 3>{near_left, near_right, far_right}, color);
+          composition.emplace(array<Point*, 3>{near_left, far_right, far_left}, color);
         }
       }
 
