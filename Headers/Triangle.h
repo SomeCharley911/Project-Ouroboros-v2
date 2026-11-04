@@ -64,6 +64,13 @@ public:
    */
   Triangle* setPosition(const std::array<Point*, 3>& position);
 
+  /**
+   * @brief Compares the id's of triangles (result isn't helpful but it allows the triangle to be put in sets)
+   *
+   * @param other
+   * @return true
+   * @return false
+   */
   bool Triangle::operator>(const Triangle& other) const;
 
 private:
