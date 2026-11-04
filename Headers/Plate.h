@@ -58,7 +58,7 @@ public:
   bool removeTriangle(long id);
 
 private:
-  std::vector<Triangle> m_composition; /// Current composition of the plate
+  std::set<Triangle> m_composition; /// Current composition of the plate
 };
 
 #endif // PLATE_H

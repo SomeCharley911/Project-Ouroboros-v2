@@ -64,6 +64,8 @@ public:
    */
   Triangle* setPosition(const std::array<Point*, 3>& position);
 
+  bool Triangle::operator>(const Triangle& other) const;
+
 private:
   std::array<Point*, 3> m_position;                  /// Current position of the triangle
   std::array<float, 3> m_color = {1.0f, 1.0f, 1.0f}; /// current color of the triangle
