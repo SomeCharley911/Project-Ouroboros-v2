@@ -78,7 +78,7 @@ public:
    * @param other The other triangle to compare to
    * @return true if this triangle has a greater ID
    */
-  bool Triangle::operator>(const Triangle& other) const;
+  bool operator>(const Triangle& other) const;
 
 private:
   std::array<Point*, 3> m_position;                  /// Current position of the triangle
