@@ -3,7 +3,7 @@
 
 #include "Triangle.h"
 #include <cstddef>
-#include <set>
+#include <vector>
 
 /**
  * @brief A simple tectonic plate for world generation
@@ -22,13 +22,13 @@ public:
    *
    * @param vector<Triangle> The initial composition of the plate
    */
-  Plate(std::set<Triangle> composition);
+  Plate(std::vector<Triangle> composition);
   /**
    * @brief Get the Vertices of the plate
    *
    * @return vector<Triangle> The current composition of the plate
    */
-  const std::set<Triangle>& getComposition() const;
+  const std::vector<Triangle>& getComposition() const;
 
   /**
    * @brief Set the Composition of the plate
@@ -37,7 +37,7 @@ public:
    *
    * @return Plate* A pointer to the current plate object
    */
-  Plate* setComposition(std::set<Triangle> composition);
+  Plate* setComposition(std::vector<Triangle> composition);
 
   /**
    * @brief Add a single triangle to the plate's composition
@@ -51,14 +51,14 @@ public:
   /**
    * @brief Remove a single triangle from the plate's composition
    *
-   * @param long The ID of the triangle to be removed
+   * @param triangle The triangle to be removed
    *
    * @return bool True if the triangle was removed, false otherwise
    */
   bool removeTriangle(Triangle triangle);
 
 private:
-  std::set<Triangle> m_composition; /// Current composition of the plate
+  std::vector<Triangle> m_composition; /// Current composition of the plate
 };
 
 #endif // PLATE_H

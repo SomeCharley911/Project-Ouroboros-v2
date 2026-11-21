@@ -4,7 +4,6 @@
 #include <cmath>
 #include <deque>
 #include <iostream>
-#include <set>
 #include <utility>
 #include <vector>
 
@@ -233,7 +232,8 @@ vector<Plate> makePlates(deque<Point>& point_storage)
 
   for (int plate_x = 0; plate_x < plates_per_side; ++plate_x) {
     for (int plate_z = 0; plate_z < plates_per_side; ++plate_z) {
-      set<Triangle> composition;
+      vector<Triangle> composition;
+      composition.reserve(static_cast<size_t>(plate_side_length * plate_side_length * 2));
       // Use a repeatable color pattern based on the plate's grid coordinates.
       const size_t color_index = static_cast<size_t>((plate_x * 3 + plate_z * 5) % static_cast<int>(plate_colors.size()));
       const auto color = plate_colors[color_index];
@@ -257,8 +257,8 @@ vector<Plate> makePlates(deque<Point>& point_storage)
           point_storage.emplace_back(array<float, 3>{right, floor_elevation, far_edge});
           Point* far_right = &point_storage.back();
 
-          composition.emplace(array<Point*, 3>{near_left, near_right, far_right}, color);
-          composition.emplace(array<Point*, 3>{near_left, far_right, far_left}, color);
+          composition.emplace_back(array<Point*, 3>{near_left, near_right, far_right}, color);
+          composition.emplace_back(array<Point*, 3>{near_left, far_right, far_left}, color);
         }
       }
 
@@ -309,7 +309,7 @@ void drawTriangles(const vector<Triangle>& triangles, float aspect_ratio, const 
 
 void drawPlates(const vector<Plate>& plates, float aspect_ratio, const Camera& camera)
 {
-  // Plate compositions are sets, so traverse each plate's stored triangles directly.
+  // Traverse each plate's stored triangles directly.
   glBegin(GL_TRIANGLES);
   for (const Plate& plate : plates) {
     for (const Triangle& triangle : plate.getComposition()) {

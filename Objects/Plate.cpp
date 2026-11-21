@@ -6,16 +6,16 @@ using namespace std;
 
 Plate::Plate() = default;
 
-Plate::Plate(set<Triangle> composition): m_composition(move(composition))
+Plate::Plate(vector<Triangle> composition): m_composition(move(composition))
 {
 }
 
-const set<Triangle>& Plate::getComposition() const
+const vector<Triangle>& Plate::getComposition() const
 {
   return m_composition;
 }
 
-Plate* Plate::setComposition(set<Triangle> composition)
+Plate* Plate::setComposition(vector<Triangle> composition)
 {
   m_composition = move(composition);
   return this;
@@ -23,7 +23,7 @@ Plate* Plate::setComposition(set<Triangle> composition)
 
 Plate* Plate::addTriangle(Triangle triangle)
 {
-  m_composition.insert(move(triangle));
+  m_composition.emplace_back(triangle);
   return this;
 }
 
