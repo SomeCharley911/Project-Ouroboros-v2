@@ -55,7 +55,7 @@ public:
    *
    * @return bool True if the triangle was removed, false otherwise
    */
-  bool removeTriangle(long id);
+  bool removeTriangle(Triangle triangle);
 
 private:
   std::set<Triangle> m_composition; /// Current composition of the plate

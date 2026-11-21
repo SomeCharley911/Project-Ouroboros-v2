@@ -6,8 +6,7 @@ using namespace std;
 
 Plate::Plate() = default;
 
-Plate::Plate(set<Triangle> composition)
-    : m_composition(move(composition))
+Plate::Plate(set<Triangle> composition): m_composition(move(composition))
 {
 }
 
@@ -28,11 +27,13 @@ Plate* Plate::addTriangle(Triangle triangle)
   return this;
 }
 
-bool Plate::removeTriangle(long id)
+bool Plate::removeTriangle(Triangle triangle)
 {
-  size_t temp = m_composition.size();
-  erase_if(m_composition, [id](const Triangle& item) { return item.getId() == id; });
-  if (temp > m_composition.size())
-    return true;
+  for (size_t i = 0; i < m_composition.size(); ++i) {
+    if (m_composition.at(i) == triangle) {
+      m_composition.erase(m_composition.begin() + i);
+      return true;
+    }
+  }
   return false;
 }

@@ -13,21 +13,21 @@ else
 	endif
 endif
 
+#inlcuded headers
+INC_HEAD := Headers/
+
 # compiler options
 CXXFLAGS = -g -Wall -Wextra
 CXXFLAGS += -std=c++20 -fmodules-ts -pedantic -pedantic-errors
 CXXFLAGS += -Wfloat-equal -Wredundant-decls -Wshadow -Wconversion -Wuninitialized
+CXXFLAGS += $(addprefix -I, $(INC_HEAD))
 
 GLFW_CFLAGS = $(shell pkg-config --cflags glfw3)
 GLFW_LIBS = $(shell pkg-config --libs glfw3)
 
-# list .h files here
-HEADERS = Headers/Plate.h Headers/Triangle.h Headers/Point.h
-
-
 # list .cpp files here according to main program, tests, or both
 PROGRAM_FILES = main.cpp
-SHARED_FILES = Objects/Point.cpp Objects/Triangle.cpp Objects/Plate.cpp
+SHARED_FILES := $(wildcard Objects/*.cpp)
 
 .PHONY: all
 all: program.exe

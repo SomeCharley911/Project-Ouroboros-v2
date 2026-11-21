@@ -12,11 +12,12 @@
  */
 class Triangle {
 public:
+  // constructors
   /**
    * @brief Construct a new triangle object
    *
    */
-  Triangle();
+  Triangle(const std::array<Point*, 3>& vertices);
 
   /**
    * @brief Construct a new triangle object with the provided position and color
@@ -25,6 +26,19 @@ public:
    * @param const array<float, 3>& The initial color of the triangle
    */
   Triangle(const std::array<Point*, 3>& vertices, const std::array<float, 3>& color);
+
+  // operators
+  /**
+   * @brief equality operator for the triangle object
+   *
+   * @param const Triangle& The triangle object to compare with
+   *
+   * @return true If the triangles are equal
+   * @return false Otherwise
+   */
+  bool operator==(const Triangle& other) const;
+
+  // getters
   /**
    * @brief Get the Current Color of the triangle
    *
@@ -39,13 +53,7 @@ public:
    */
   const std::array<Point*, 3>& getPosition() const;
 
-  /**
-   * @brief Get the unique identifier of the triangle
-   *
-   * @return long The unique identifier of the triangle
-   */
-  long getId() const;
-
+  // setters
   /**
    * @brief Set the Color of the triangle on screen
    *
@@ -65,25 +73,17 @@ public:
   Triangle* setPosition(const std::array<Point*, 3>& position);
 
   /**
-   * @brief Compares the IDs of triangles for ordered containers
+   * @brief Get the unique identifier of the triangle
    *
-   * @param other The other triangle to compare to
-   * @return true if this triangle has a smaller ID
+   * @return long The unique identifier of the triangle
    */
-  bool operator<(const Triangle& other) const;
-
-  /**
-   * @brief Compares the IDs of triangles
-   *
-   * @param other The other triangle to compare to
-   * @return true if this triangle has a greater ID
-   */
-  bool operator>(const Triangle& other) const;
+  // long getId() const; //not implemented yet, but may be used for future features
 
 private:
-  std::array<Point*, 3> m_position;                  /// Current position of the triangle
-  std::array<float, 3> m_color = {1.0f, 1.0f, 1.0f}; /// current color of the triangle
-  long m_id = reinterpret_cast<long>(this);          /// Unique identifier for the triangle
+  // inline static long s_idCounter = 0;                /// Static counter for unique triangle IDs
+  std::array<Point*, 3> m_position; /// Current position of the triangle
+  std::array<float, 3> m_color;     /// current color of the triangle
+  // long m_id;                                         /// Unique identifier for the triangle
 };
 
 #endif // TRIANGLE_H
