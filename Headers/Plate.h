@@ -2,7 +2,6 @@
 #define PLATE_H
 
 #include "Triangle.h"
-#include <cstddef>
 #include <vector>
 
 /**

@@ -3,8 +3,6 @@
 
 #include "IdItem.h"
 #include <array>
-#include <cstddef>
-#include <vector>
 
 /**
  * @brief A simple vector point
@@ -32,7 +30,7 @@ public:
   /**
    * @brief Copy constructor for the point object
    *
-   * @param const Point& The point object to copy from
+   * @param Point& const The point object to copy from
    */
   Point(const Point& other);
 
@@ -45,7 +43,7 @@ public:
   /**
    * @brief Assignment operator for the point object
    *
-   * @param const Point& The point object to assign from
+   * @param Point& const The point object to assign from
    *
    * @return Point* A pointer to the current point object
    */
@@ -55,7 +53,7 @@ public:
   /**
    * @brief Less-than operator for the point object
    *
-   * @param const Point& The point object to compare with
+   * @param Point& const The point object to compare with
    *
    * @return true If the current point's ID is less than the other point's ID
    * @return false Otherwise
@@ -64,14 +62,14 @@ public:
   /**
    * @brief Get the Position of the point
    *
-   * @return const array<float, 3>& The current position of the point
+   * @return array<float, 3>& const The current position of the point
    */
   std::array<float, 3> getPosition() const;
 
   /**
    * @brief Set the Position of the point
    *
-   * @param const array<float, 3>& The new position of the point
+   * @param array<float, 3>& const The new position of the point
    *
    * @return Point* A pointer to the current point object
    */
@@ -80,7 +78,7 @@ public:
   /**
    * @brief Get a pointer to the coordinate of the point at the specified index
    *
-   * @param unsigned short The index of the coordinate to retrieve (0 for x, 1 for y, 2 for z)
+   * @param unsigned_short The index of the coordinate to retrieve (0 for x, 1 for y, 2 for z)
    *
    * @return float* A pointer to the requested coordinate
    */
@@ -89,7 +87,7 @@ public:
   /**
    * @brief Get a pointer to the coordinate of the point at the specified index
    *
-   * @param unsigned short The index of the coordinate to retrieve (0 for x, 1 for y, 2 for z)
+   * @param unsigned_short The index of the coordinate to retrieve (0 for x, 1 for y, 2 for z)
    *
    * @return float* A pointer to the requested coordinate
    */

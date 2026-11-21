@@ -3,8 +3,6 @@
 
 #include "Point.h"
 #include <array>
-#include <cstddef>
-#include <vector>
 
 /**
  * @brief A simple vector triangle for displaying to the screen using OpenGL.
@@ -22,8 +20,8 @@ public:
   /**
    * @brief Construct a new triangle object with the provided position and color
    *
-   * @param const array<Point, 3>& The initial vertices of the triangle
-   * @param const array<float, 3>& The initial color of the triangle
+   * @param array<Point*, 3>& const The initial vertices of the triangle
+   * @param array<float, 3>& const The initial color of the triangle
    */
   Triangle(const std::array<Point*, 3>& vertices, const std::array<float, 3>& color);
 
@@ -31,7 +29,7 @@ public:
   /**
    * @brief equality operator for the triangle object
    *
-   * @param const Triangle& The triangle object to compare with
+   * @param  Triangle& const The triangle object to compare with
    *
    * @return true If the triangles are equal
    * @return false Otherwise
@@ -42,14 +40,14 @@ public:
   /**
    * @brief Get the Current Color of the triangle
    *
-   * @return const array<float, 3>& The current color of the triangle
+   * @return array<float, 3>& const The current color of the triangle
    */
   const std::array<float, 3>& getColor() const;
 
   /**
    * @brief Get the Vertices of the triangle
    *
-   * @return const array<Point, 3>& The current position of the triangle
+   * @return array<Point*, 3>& const The current position of the triangle
    */
   const std::array<Point*, 3>& getPosition() const;
 
@@ -57,7 +55,7 @@ public:
   /**
    * @brief Set the Color of the triangle on screen
    *
-   * @param const array<float, 3>& The color to be used for the triangle
+   * @param array<float, 3>& const The color to be used for the triangle
    *
    * @return Triangle* A pointer to the current triangle object
    */
@@ -66,7 +64,7 @@ public:
   /**
    * @brief Set the Position of the triangle
    *
-   * @param const array<Point, 3>& The new position of the triangle
+   * @param array<Point, 3>& const The new position of the triangle
    *
    * @return Triangle* A pointer to the current triangle object
    */

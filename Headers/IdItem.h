@@ -17,7 +17,7 @@ public:
   /**
    * @brief Copy constructor for the IdItem object [DO NOT USE]
    *
-   * @param const IdItem& The IdItem object to copy from
+   * @param IdItem& const The IdItem object to copy from
    */
   IdItem(const IdItem& other) = delete; // Disable copy constructor to prevent copying of IdItem objects
 
@@ -30,7 +30,7 @@ public:
   /**
    * @brief Assignment operator for the IdItem object
    *
-   * @param const IdItem& The IdItem object to assign from
+   * @param  IdItem& const The IdItem object to assign from
    *
    * @return IdItem& A reference to the current IdItem object
    */
